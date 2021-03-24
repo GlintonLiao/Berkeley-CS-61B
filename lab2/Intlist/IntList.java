@@ -1,3 +1,5 @@
+import edu.princeton.cs.introcs.In;
+
 import java.util.Formatter;
 
 /**
@@ -82,7 +84,12 @@ public class IntList {
 
     public static IntList dcatenate(IntList A, IntList B) {
         //TODO:  fill in method
-        return null;
+        IntList C = A;
+        while (C.rest != null) {
+            C = C.rest;
+        }
+        C.rest = B;
+        return A;
     }
 
     /**
@@ -91,7 +98,16 @@ public class IntList {
      */
     public static IntList catenate(IntList A, IntList B) {
         //TODO:  fill in method
-        return null;
+        IntList C = A.rest; //Create another IntList points at A.rest.
+        IntList D = new IntList(A.first, null);//Get the first item of A.
+        IntList E = D;//Create another IntList for tracking the new List.
+        while (C != null) {
+            E.rest = new IntList(C.first, null);
+            C = C.rest;
+            E = E.rest;
+        }
+        E.rest = B;
+        return D;
     }
 
 
