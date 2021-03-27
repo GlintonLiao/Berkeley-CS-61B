@@ -72,4 +72,17 @@ public class Planet {
         return netForceY;
     }
 
+    public void update(double dt, double fX, double fY) {
+        double netaX = fX / this.mass;
+        double netaY = fY / this.mass;
+        this.xxVel = this.xxVel + dt * netaX;
+        this.yyVel = this.yyVel + dt * netaY;
+        this.xxPos = this.xxPos + dt * xxVel;
+        this.yyPos = this.yyPos + dt * yyVel;
+    }
+
+    public void draw() {
+       StdDraw.picture(xxPos, yyPos, "images/" + imgFileName);
+    }
+
 }
