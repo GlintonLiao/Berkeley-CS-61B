@@ -16,21 +16,22 @@ public class LinkedListDeque<Type> {
     private int size;
 
     public LinkedListDeque() {
-        sentinel = new StuffNode(null, null,null);
+        sentinel = new StuffNode(null, null,null); //先做个全空的，再给指针，不然会有type的问题，以及空指针的问题
         sentinel.next = sentinel;
         sentinel.prev = sentinel;
         size = 0;
     }
 
+    //一定要以多个项的情况来设想
     public void addFirst(Type x) {
-        sentinel.next = new StuffNode(x, sentinel, sentinel.next);
-        sentinel.next.next.prev = sentinel.next;
+        sentinel.next = new StuffNode(x, sentinel, sentinel.next); //新node的prev指向sentinel，next指向原来的sentinel.next
+        sentinel.next.next.prev = sentinel.next; //原有node的prev指向新加的这个node
         size += 1;
     }
 
     public void addLast(Type x) {
-        sentinel.prev.next = new StuffNode(x, sentinel.prev, sentinel);
-        sentinel.prev = sentinel.prev.next;
+        sentinel.prev.next = new StuffNode(x, sentinel.prev, sentinel); //原有node的next指向新node，新node的prev指向原node，next指向sentinel
+        sentinel.prev = sentinel.prev.next; //sentinel的prev原来指向原有的node，改成指向新node
         size += 1;
     }
 
