@@ -1,4 +1,3 @@
-import edu.princeton.cs.introcs.In;
 
 import java.util.Formatter;
 
