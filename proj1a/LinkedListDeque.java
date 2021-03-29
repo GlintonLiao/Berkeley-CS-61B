@@ -35,13 +35,14 @@ public class LinkedListDeque<Type> {
         size += 1;
     }
 
+    //两种方式，一种先弄后一项的prev指针，一种先弄next指针
     public Type removeFirst() {
         if (size == 0) {
             return null;
         }
         Type item = sentinel.next.first;
-        sentinel.next.next.prev = sentinel;
-        sentinel.next = sentinel.next.next;
+        sentinel.next = sentinel.next.next; //指向第一个的指针指向下一个
+        sentinel.next.prev = sentinel; //此使sentinel.next已经变成原来的下一个了，直接prev指回sentinel就好
         size -= 1;
         return item;
     }
@@ -51,8 +52,8 @@ public class LinkedListDeque<Type> {
             return null;
         }
         Type item = sentinel.prev.first;
-        sentinel.prev.prev.next = sentinel;
         sentinel.prev = sentinel.prev.prev;
+        sentinel.prev.next = sentinel;
         size -= 1;
         return item;
     }
