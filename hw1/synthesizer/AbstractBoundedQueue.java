@@ -1,6 +1,6 @@
 package synthesizer;
 
-public abstract class AbstractBoundedQueue<T> implements BoundedQueue{
+public abstract class AbstractBoundedQueue<T> implements BoundedQueue<T>{
 
     protected int fillCount;
     protected int capacity;
@@ -18,8 +18,8 @@ public abstract class AbstractBoundedQueue<T> implements BoundedQueue{
     public boolean isFull() {
         return fillCount == capacity;
     }
+
     public abstract T peek();
     public abstract T dequeue() throws Exception;
-    public abstract void enqueue(Object x) throws Exception;
-    abstract void moveTo(double deltaX, double deltaY);
+    public abstract void enqueue(T x) throws Exception;
 }

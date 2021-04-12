@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 //TODO: Make sure to make this class and all of its methods public
 //TODO: Make sure to make this class extend AbstractBoundedQueue<t>
-public class ArrayRingBuffer<T> extends AbstractBoundedQueue {
+public class ArrayRingBuffer<T> extends AbstractBoundedQueue<T> {
     /* Index for the next dequeue or peek. */
     private int first;            // index for the next dequeue or peek
     /* Index for the next enqueue. */
@@ -27,18 +27,23 @@ public class ArrayRingBuffer<T> extends AbstractBoundedQueue {
         last = 0;
     }
 
+
+    private int plusOne(int index) {
+        return Math.floorMod(index + 1, capacity);
+    }
+
     /**
      * Adds x to the end of the ring buffer. If there is no room, then
      * throw new RuntimeException("Ring buffer overflow"). Exceptions
      * covered Monday.
      */
-    public void enqueue(Object x) throws Exception {
+    public void enqueue(T x) throws Exception {
         // TODO: Enqueue the item. Don't forget to increase fillCount and update last.
         if (isFull()) {
             throw new Exception("Ring buffer overflow");
         }
-        rb[last] = (T) x;
-        last += 1;
+        rb[last] = x;
+        last = plusOne(last);
         fillCount += 1;
     }
 
@@ -55,14 +60,9 @@ public class ArrayRingBuffer<T> extends AbstractBoundedQueue {
             throw new Exception("Ring buffer underflow");
         }
         T removeItem = rb[first];
-        first += 1;
+        first = plusOne(first);
         fillCount -= 1;
         return removeItem;
-    }
-
-    @Override
-    void moveTo(double deltaX, double deltaY) {
-
     }
 
     /**
