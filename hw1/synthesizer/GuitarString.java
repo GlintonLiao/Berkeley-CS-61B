@@ -11,7 +11,6 @@ public class GuitarString {
 
     /* Buffer for storing sound data. */
     private BoundedQueue<Double> buffer;
-    private double first;
 
     /* Create a guitar string of the given frequency.  */
     public GuitarString(double frequency) throws Exception {
@@ -51,7 +50,7 @@ public class GuitarString {
         // TODO: Dequeue the front sample and enqueue a new sample that is
         //       the average of the two multiplied by the DECAY factor.
         //       Do not call StdAudio.play().
-        first = buffer.dequeue();
+        double first = buffer.dequeue();
         double second = buffer.peek();
         double average = (first + second) / 2 * DECAY;
         buffer.enqueue(average);
