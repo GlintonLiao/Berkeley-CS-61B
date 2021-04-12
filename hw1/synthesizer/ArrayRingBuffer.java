@@ -23,6 +23,7 @@ public class ArrayRingBuffer<T> extends AbstractBoundedQueue<T> {
         //       here shadows the field we inherit from AbstractBoundedQueue, so
         //       you'll need to use this.capacity to set the capacity.
         rb = (T[]) new Object[capacity];
+        this.capacity = capacity;
         first = 0;
         last = 0;
     }
@@ -37,10 +38,10 @@ public class ArrayRingBuffer<T> extends AbstractBoundedQueue<T> {
      * throw new RuntimeException("Ring buffer overflow"). Exceptions
      * covered Monday.
      */
-    public void enqueue(T x) throws Exception {
+    public void enqueue(T x) {
         // TODO: Enqueue the item. Don't forget to increase fillCount and update last.
         if (isFull()) {
-            throw new Exception("Ring buffer overflow");
+            throw new RuntimeException("Ring buffer overflow");
         }
         rb[last] = x;
         last = plusOne(last);
@@ -54,10 +55,10 @@ public class ArrayRingBuffer<T> extends AbstractBoundedQueue<T> {
      * covered Monday.
      */
     @Override
-    public T dequeue() throws Exception {
+    public T dequeue() {
         // TODO: Dequeue the first item. Don't forget to decrease fillCount and update 
         if (isEmpty()) {
-            throw new Exception("Ring buffer underflow");
+            throw new RuntimeException("Ring buffer underflow");
         }
         T removeItem = rb[first];
         first = plusOne(first);

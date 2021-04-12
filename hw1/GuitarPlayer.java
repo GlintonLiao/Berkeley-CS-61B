@@ -38,7 +38,7 @@ public class GuitarPlayer {
         }
     }
 
-    private void initialize() {
+    private void initialize() throws Exception {
         strings = new GuitarString[128];
         vol = new double[128];
         for (int i = 0; i < strings.length; i++) {
@@ -47,7 +47,7 @@ public class GuitarPlayer {
         }
     }
 
-    private void tic() {
+    private void tic() throws Exception {
         for (int i = 0; i < strings.length; i++) {
             if (vol[i] > 0.0) {
                 strings[i].tic();
@@ -63,7 +63,7 @@ public class GuitarPlayer {
         return sum;
     }
 
-    public void play() {
+    public void play() throws Exception {
         if (sequence == null) {
             return;
         }
@@ -77,9 +77,9 @@ public class GuitarPlayer {
         Track track = sequence.createTrack();
         int maxSize = 0;
         int lead = 0;
-        for (int i = 0; i < tracks.length; i++) {
-            for (int j = 0; j < tracks[i].size(); j++) {
-                track.add(tracks[i].get(j));
+        for (Track value : tracks) {
+            for (int j = 0; j < value.size(); j++) {
+                track.add(value.get(j));
             }
         }
 
