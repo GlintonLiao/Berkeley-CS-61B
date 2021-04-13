@@ -17,7 +17,7 @@ public class TTFAF {
             source = new GZIPInputStream(source);
             GuitarPlayer player = new GuitarPlayer(source);
             player.play();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
