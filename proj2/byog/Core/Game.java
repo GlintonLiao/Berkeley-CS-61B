@@ -17,15 +17,13 @@ public class Game {
     private static final long SEED = 2873123;
     private static final Random RANDOM = new Random(SEED);
 
-    private static double usage;
-    private static int size;
     public TETile[][] world = new TETile[WIDTH][HEIGHT];
 
     /**
      * Fills the given 2D array of tiles with NOTHING tiles.
      * @param tiles tiles to be filled.
      */
-    public static void fillWithNothing(TETile[][] tiles) {
+    public void fillWithNothing(TETile[][] tiles) {
         int height = tiles[0].length;
         int width = tiles.length;
         for (int x = 0; x < width; x += 1) {
@@ -36,56 +34,119 @@ public class Game {
     }
 
     /* Get next position by previous geometry */
-    public static Position getNextPosition(Position prev, int width, int height){
-        int x = RandomUtils.uniform(RANDOM, prev.x, prev.x + width);
-        int y = RandomUtils.uniform(RANDOM, prev.y, prev.y + height);
+    public Position getNextPosition(Position prev, int width, int height){
+        int x;
+        int y;
+        if (height == 1) {
+            x = RandomUtils.uniform(RANDOM, prev.x, prev.x + width);
+            y = prev.y;
+        } else if (width == 1) {
+            x = prev.x;
+            y = RandomUtils.uniform(RANDOM, prev.y, prev.y + height);
+        } else {
+            x = prev.x + width;
+            y = RandomUtils.uniform(RANDOM, prev.y, prev.y + height);
+        }
+        return new Position(x, y);
+    }
+
+    public Position getNextRoomPosition(Position prev, int width, int height) {
+        int x = prev.x;
+        int y = prev.y;
         return new Position(x, y);
     }
 
     /* Make a random room by previous geometry */
-    public static void makeRoom(TETile[][] world, Position prev, int prevWidth, int prevHeight){
-        if (usage > 0.5) { return; }
-        int width = RandomUtils.uniform(RANDOM, 0, 7);
-        int height = RandomUtils.uniform(RANDOM, 0, 7);
-        Position next = getNextPosition(prev,prevWidth, prevHeight);
+    public void makeRoom(TETile[][] world, Position prev, int prevWidth, int prevHeight){
+        int width = RandomUtils.uniform(RANDOM, 2, 8);
+        int height = RandomUtils.uniform(RANDOM, 2, 8);
+        Position next = getNextRoomPosition(prev, prevWidth, prevHeight);
+        boolean isDown = RandomUtils.bernoulli(RANDOM);
+
+        if (next.x + width >= WIDTH) {
+            return;
+        } else if (next.y + height >= HEIGHT || isDown) {
+            next.y = (next.y - height <= 0)? 1: next.y - height;
+            next.x -= RandomUtils.uniform(RANDOM, 0, 4);
+        }
         drawRoom(world, next, width, height);
     }
 
     /* Draw a Room */
-    public static void drawRoom(TETile[][] world, Position p, int width, int height) {
+    public void drawRoom(TETile[][] world, Position p, int width, int height) {
+
+        // fill with floor tile
         for (int i = p.x; i < p.x + width; i += 1) {
             for (int j = p.y; j < p.y + height; j += 1) {
                 world[i][j] = Tileset.FLOOR;
             }
         }
-        size += width * height;
-        usage = (double) size / (double) (WIDTH * HEIGHT);
 
         // Add wall to the outlines
         addWall(world, p, width, height);
 
-        makeHallway(world, p, width, height);
     }
 
     /* Generate a Hallway */
-    public static void makeHallway(TETile[][] world, Position prev, int prevWidth, int prevHeight) {
-        if (usage > 0.5) { return; }
-        Position next = getNextPosition(prev, prevWidth, prevHeight);
+    public void makeHallway(TETile[][] world, Position prev, int prevWidth, int prevHeight) {
+        Position next1 = getNextPosition(prev, prevWidth, prevHeight);
+        Position next2 = getNextPosition(prev, prevWidth, prevHeight);
         boolean isHorizontal = RandomUtils.bernoulli(RANDOM);
-        int width;
-        int height;
+        boolean isDown = RandomUtils.bernoulli(RANDOM);
+
+        int width1;
+        int height1;
         if (isHorizontal) {
-            width = RandomUtils.uniform(RANDOM, 0, 7);
-            height = 1;
+            width1 = RandomUtils.uniform(RANDOM, 4, 15);
+            height1 = 1;
         } else {
-            height = RandomUtils.uniform(RANDOM, 0, 7);
-            width = 1;
+            height1 = RandomUtils.uniform(RANDOM, 10, 20);
+            width1 = 1;
         }
-        drawHallway(world, next, width, height);
+
+        if (next1.x + width1 >= WIDTH) {
+            return;
+        } else if (next1.y + height1 >= HEIGHT || isDown) {
+            next1.y = (next1.y - height1 <= 0)? 1: next1.y - height1;
+        }
+
+        drawHallway(world, next1, width1, height1);
+
+        /*int width2;
+        int height2;
+        if (!isHorizontal) {
+            width2 = RandomUtils.uniform(RANDOM, 5, 10);
+            height2 = 1;
+        } else {
+            height2 = RandomUtils.uniform(RANDOM, 5, 10);
+            width2 = 1;
+        }
+
+        if (next2.x + width2 >= WIDTH) {
+            return;
+        } else if (next2.y + height2 >= HEIGHT || !isDown) {
+            next2.y = (next2.y - height2 <= 0)? 1: next2.y - height2;
+        }
+
+        drawHallway(world, next2, width2, height2);*/
+
+        // Decide which one is the next geometry
+        /*boolean isNextHallway = RandomUtils.bernoulli(RANDOM);
+        if (isNextHallway) {
+            makeHallway(world, next1, width1, height1);
+        } else {
+            makeRoom(world, next2, width2, height2);
+        }*/
+
+        /*makeRoom(world, next2, width2, height2);
+        makeHallway(world, next1, width1, height1);*/
+
     }
 
     /* Draw a Hallway */
-    public static void drawHallway(TETile[][] world, Position p, int width, int height) {
+    public void drawHallway(TETile[][] world, Position p, int width, int height) {
+
+        // fill with floor tile
         if (width == 1) {
             for (int i = p.y; i < p.y + height; i += 1) {
                 world[p.x][i] = Tileset.FLOOR;
@@ -96,23 +157,17 @@ public class Game {
             }
         }
 
-        size += width * height;
-        usage = (double) size / (double) (WIDTH * HEIGHT);
-
         // Add wall to the outlines
         addWall(world, p, width, height);
 
-        // Decide which one is the next geometry
-        boolean isNextHallway = RandomUtils.bernoulli(RANDOM);
-        if (isNextHallway) {
-            makeHallway(world, p, width, height);
-        } else {
-            makeRoom(world, p, width, height);
-        }
+        makeRoom(world, p, width, height);
+        makeHallway(world, p, width, height);
+
+
     }
 
     /* Add a frame to the geometry */
-    public static void addWall(TETile[][] world, Position p, int width, int height) {
+    public void addWall(TETile[][] world, Position p, int width, int height) {
         int newWidth = width + 2;
         int newHeight = height + 2;
         Position newP = new Position(p.x - 1, p.y - 1);
@@ -149,9 +204,26 @@ public class Game {
         // TODO: Fill out this method to run the game using the input passed in,
         // and return a 2D tile representation of the world that would have been
         // drawn if the same inputs had been given to playWithKeyboard().
+
+        ter.initialize(WIDTH, HEIGHT);
+        fillWithNothing(world);
+
+
         Position startPosition = new Position(5, 5);
         makeRoom(world, startPosition, 3, 4);
+
         TETile[][] finalWorldFrame = world;
         return finalWorldFrame;
+    }
+
+    public static void main(String[] args) {
+        Game newGame = new Game();
+        newGame.ter.initialize(WIDTH, HEIGHT);
+        newGame.fillWithNothing(newGame.world);
+
+        Position p = new Position(2, 10);
+        newGame.makeHallway(newGame.world, p, 2, 2);
+
+        newGame.ter.renderFrame(newGame.world);
     }
 }
