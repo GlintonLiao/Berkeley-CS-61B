@@ -17,6 +17,8 @@ public class Game {
     private static final long SEED = 2873123;
     private static final Random RANDOM = new Random(SEED);
 
+    boolean isHorizontal = true;
+
     public TETile[][] world = new TETile[WIDTH][HEIGHT];
 
     /**
@@ -40,19 +42,24 @@ public class Game {
         if (height == 1) {
             x = RandomUtils.uniform(RANDOM, prev.x, prev.x + width);
             y = prev.y;
-        } else if (width == 1) {
-            x = prev.x;
-            y = RandomUtils.uniform(RANDOM, prev.y, prev.y + height);
         } else {
-            x = prev.x + width;
+            x = prev.x;
             y = RandomUtils.uniform(RANDOM, prev.y, prev.y + height);
         }
         return new Position(x, y);
     }
 
     public Position getNextRoomPosition(Position prev, int width, int height) {
-        int x = prev.x;
-        int y = prev.y;
+        boolean isStart = RandomUtils.bernoulli(RANDOM);
+        int x, y;
+        if (isStart) {
+            x = prev.x + width;
+            y = prev.y + height;
+        } else {
+            x = prev.x;
+            y = prev.y;
+        }
+
         return new Position(x, y);
     }
 
@@ -67,8 +74,9 @@ public class Game {
             return;
         } else if (next.y + height >= HEIGHT || isDown) {
             next.y = (next.y - height <= 0)? 1: next.y - height;
-            next.x -= RandomUtils.uniform(RANDOM, 0, 4);
+            next.x -= RandomUtils.uniform(RANDOM, 0, 2);
         }
+        next.x -= RandomUtils.uniform(RANDOM, 0, 3);
         drawRoom(world, next, width, height);
     }
 
@@ -91,17 +99,18 @@ public class Game {
     public void makeHallway(TETile[][] world, Position prev, int prevWidth, int prevHeight) {
         Position next1 = getNextPosition(prev, prevWidth, prevHeight);
         Position next2 = getNextPosition(prev, prevWidth, prevHeight);
-        boolean isHorizontal = RandomUtils.bernoulli(RANDOM);
         boolean isDown = RandomUtils.bernoulli(RANDOM);
 
         int width1;
         int height1;
         if (isHorizontal) {
-            width1 = RandomUtils.uniform(RANDOM, 4, 15);
+            width1 = RandomUtils.uniform(RANDOM, 8, 15);
             height1 = 1;
+            isHorizontal = false;
         } else {
             height1 = RandomUtils.uniform(RANDOM, 10, 20);
             width1 = 1;
+            isHorizontal = true;
         }
 
         if (next1.x + width1 >= WIDTH) {
@@ -156,6 +165,7 @@ public class Game {
                 world[i][p.y] = Tileset.FLOOR;
             }
         }
+
 
         // Add wall to the outlines
         addWall(world, p, width, height);
@@ -221,7 +231,7 @@ public class Game {
         newGame.ter.initialize(WIDTH, HEIGHT);
         newGame.fillWithNothing(newGame.world);
 
-        Position p = new Position(2, 10);
+        Position p = new Position(2, 20);
         newGame.makeHallway(newGame.world, p, 2, 2);
 
         newGame.ter.renderFrame(newGame.world);
