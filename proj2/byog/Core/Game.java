@@ -56,7 +56,7 @@ public class Game {
     /* Move start point randomly */
     public Position movePoint(Position p, int width, int height) {
 
-        int xDistance = RandomUtils.uniform(RANDOM, Math.max(3, width));
+        int xDistance = RandomUtils.uniform(RANDOM, Math.max(2, width));
         int yDistance = RandomUtils.uniform(RANDOM, Math.max(2, height));
 
         /*if (isLeft) {
@@ -74,8 +74,8 @@ public class Game {
 
     /* Make a random room by previous geometry */
     public void makeRoom(TETile[][] world, Position prev, int prevWidth, int prevHeight){
-        int width = RandomUtils.uniform(RANDOM, 3, 6);
-        int height = RandomUtils.uniform(RANDOM, 3, 6);
+        int width = RandomUtils.uniform(RANDOM, 2, 6);
+        int height = RandomUtils.uniform(RANDOM, 2, 6);
 
         Position originStart = getNextPosition(prev, prevWidth, prevHeight);
         Position newStart = movePoint(originStart, width, height);
@@ -87,7 +87,7 @@ public class Game {
             newStart.y -= height;
         }
         if (newStart.y <= 0) {
-            newStart.y = 1;
+            newStart.y = 2;
         }
 
         drawRoom(world, newStart, width, height);
@@ -122,7 +122,7 @@ public class Game {
             width1 = RandomUtils.uniform(RANDOM, 6, 15);
             height1 = 1;
         } else {
-            height1 = RandomUtils.uniform(RANDOM, 6, 15);
+            height1 = RandomUtils.uniform(RANDOM, 9, 18);
             width1 = 1;
         }
 
@@ -258,8 +258,8 @@ public class Game {
         newGame.ter.initialize(WIDTH, HEIGHT);
         newGame.fillWithNothing(newGame.world);
 
-        Position p = new Position(7, 15);
-        newGame.makeRoom(newGame.world, p, 1, 5);
+        Position p = new Position(8, 15);
+        newGame.makeRoom(newGame.world, p, 2, 4);
 
         newGame.ter.renderFrame(newGame.world);
     }
