@@ -203,22 +203,22 @@ public class Game {
         }*/
 
         switch (corner) {
-            case 0 -> {
+            case 0:
                 next.x = prev.x - width1 + 1;
                 next.y = RandomUtils.uniform(RANDOM, prev.y, prev.y + prevHeight);
-            }
-            case 1 -> {
+                break;
+            case 1:
                 next.x = RandomUtils.uniform(RANDOM, prev.x, prev.x + prevWidth);
                 next.y = prev.y + prevHeight - 1;
-            }
-            case 2 -> {
+                break;
+            case 2:
                 next.x = prev.x + prevWidth - 1;
                 next.y = RandomUtils.uniform(RANDOM, prev.y, prev.y + prevHeight);
-            }
-            case 3 -> {
+                break;
+            case 3:
                 next.x = RandomUtils.uniform(RANDOM, prev.x, prev.x + prevWidth);
                 next.y = prev.y - height1 + 1;
-            }
+                break;
         }
 
         if (next.x + width1 >= WIDTH) {
