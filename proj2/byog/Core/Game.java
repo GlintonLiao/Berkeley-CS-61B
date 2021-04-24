@@ -14,7 +14,7 @@ public class Game {
     public static final int WIDTH = 80;
     public static final int HEIGHT = 50;
 
-    private static final long SEED = 89547;
+    private static final long SEED = 898956;
     private static final Random RANDOM = new Random(SEED);
 
     public TETile[][] world = new TETile[WIDTH][HEIGHT];
@@ -39,17 +39,17 @@ public class Game {
         int y = 0;
 
         if (height == 1) {
-            x = RandomUtils.uniform(RANDOM, prev.x, prev.x + width - 1);
+            x = RandomUtils.uniform(RANDOM, prev.x, prev.x + width);
             y = prev.y;
         } else if (width == 1){
             x = prev.x;
-            y = RandomUtils.uniform(RANDOM, prev.y, prev.y + height - 1);
+            y = RandomUtils.uniform(RANDOM, prev.y, prev.y + height);
         }
 
         return new Position(x, y);
     }
 
-    public Position getNextAtCorner(Position prev, int width, int height) {
+    /*public Position getNextAtCorner(Position prev, int width, int height) {
         int corner = RandomUtils.uniform(RANDOM, 0, 3);
         int x = 0;
         int y = 0;
@@ -68,7 +68,7 @@ public class Game {
                 y = prev.y;
         }
         return new Position(x, y);
-    }
+    }*/
 
 
     /* Move start point randomly */
@@ -90,8 +90,8 @@ public class Game {
 
     /* Make a random room by previous geometry */
     public void makeRoom(TETile[][] world, Position prev, int prevWidth, int prevHeight){
-        int width = RandomUtils.uniform(RANDOM, 2, 8);
-        int height = RandomUtils.uniform(RANDOM, 1, 10);
+        int width = RandomUtils.uniform(RANDOM, 1, 8);
+        int height = RandomUtils.uniform(RANDOM, 1, 8);
 
         Position originStart = getNextPosition(prev, prevWidth, prevHeight);
         /*Position newStart = movePoint(originStart, width, height);*/
@@ -104,7 +104,7 @@ public class Game {
             newStart.y = newStart.y - height + 1;
         }
         if (newStart.y <= 0) {
-            newStart.y = 2;
+            newStart.y = newStart.y + height - 1;
         } if (newStart.x <= 0) {
             newStart.x = 2;
         }
@@ -139,14 +139,14 @@ public class Game {
         int width1;
         int height1;
         if (isHorizontal) {
-            width1 = RandomUtils.uniform(RANDOM, 10, 16);
+            width1 = RandomUtils.uniform(RANDOM, 5, 20);
             height1 = 1;
         } else {
-            height1 = RandomUtils.uniform(RANDOM, 10, 16);
+            height1 = RandomUtils.uniform(RANDOM, 5, 20);
             width1 = 1;
         }
 
-        switch (corner) {
+        /*switch (corner) {
             case 0:
                 if (isHorizontal) {
                     next.x = prev.x - width1 + 1;
@@ -177,13 +177,32 @@ public class Game {
                     next.y = prev.y - height1 + 1;
                 }
                 break;
+        }*/
+
+        switch (corner) {
+            case 0 -> {
+                next.x = prev.x - width1 + 1;
+                next.y = RandomUtils.uniform(RANDOM, prev.y, prev.y + prevHeight);
+            }
+            case 1 -> {
+                next.x = RandomUtils.uniform(RANDOM, prev.x, prev.x + prevWidth);
+                next.y = prev.y + prevHeight - 1;
+            }
+            case 2 -> {
+                next.x = prev.x + prevWidth - 1;
+                next.y = RandomUtils.uniform(RANDOM, prev.y, prev.y + prevHeight);
+            }
+            case 3 -> {
+                next.x = RandomUtils.uniform(RANDOM, prev.x, prev.x + prevWidth);
+                next.y = prev.y - height1 + 1;
+            }
         }
 
         if (next.x + width1 >= WIDTH) {
             addLocker(world);
             return;
         } else if (next.y + height1 >= HEIGHT) {
-            next.y = prev.y - height1;
+            next.y = prev.y - height1 + 1;
         } else if (next.y <= 0) {
             next.y = prev.y + prevHeight - 1;
         } else if (next.x <= 0) {
@@ -311,7 +330,7 @@ public class Game {
         newGame.ter.initialize(WIDTH, HEIGHT);
         newGame.fillWithNothing(newGame.world);
 
-        Position p = new Position(8, 25);
+        Position p = new Position(8, 8);
         newGame.makeRoom(newGame.world, p, 1, 4);
 
         newGame.ter.renderFrame(newGame.world);
