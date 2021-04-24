@@ -14,7 +14,7 @@ public class Game {
     public static final int WIDTH = 80;
     public static final int HEIGHT = 50;
 
-    private static final long SEED = 898956;
+    private static final long SEED = 256;
     private static final Random RANDOM = new Random(SEED);
 
     public TETile[][] world = new TETile[WIDTH][HEIGHT];
@@ -37,8 +37,12 @@ public class Game {
     public Position getNextPosition(Position prev, int width, int height){
         int x = 0;
         int y = 0;
+        boolean movingBack = RandomUtils.bernoulli(RANDOM);
 
         if (height == 1) {
+            if (movingBack) {
+                x = RandomUtils.uniform(RANDOM, prev.x, prev.x + width);
+            }
             x = RandomUtils.uniform(RANDOM, prev.x, prev.x + width);
             y = prev.y;
         } else if (width == 1){
@@ -91,11 +95,29 @@ public class Game {
     /* Make a random room by previous geometry */
     public void makeRoom(TETile[][] world, Position prev, int prevWidth, int prevHeight){
         int width = RandomUtils.uniform(RANDOM, 1, 8);
-        int height = RandomUtils.uniform(RANDOM, 1, 8);
+        int height = RandomUtils.uniform(RANDOM, 1, 10);
+        boolean isBack = RandomUtils.bernoulli(RANDOM);
 
         Position originStart = getNextPosition(prev, prevWidth, prevHeight);
         /*Position newStart = movePoint(originStart, width, height);*/
         Position newStart = originStart;
+
+        if (prevWidth == 1) {
+            newStart.y = RandomUtils.uniform(RANDOM, prev.y, prev.y + prevHeight);
+            if (isBack) {
+                newStart.x = prev.x - width + 1;
+            } else {
+                newStart.x = prev.x;
+            }
+        } else {
+            newStart.x = RandomUtils.uniform(RANDOM, prev.x, prev.x + prevWidth);
+            if (isBack) {
+                newStart.y = prev.y - height + 1;
+            } else {
+                newStart.y = prev.y;
+            }
+        }
+
 
         if (newStart.x + width >= WIDTH) {
             addLocker(world);
@@ -125,6 +147,7 @@ public class Game {
         // Add wall to the outlines
         addWall(world, p, width, height);
 
+
         makeHallway(world, p, width, height);
 
     }
@@ -139,10 +162,10 @@ public class Game {
         int width1;
         int height1;
         if (isHorizontal) {
-            width1 = RandomUtils.uniform(RANDOM, 5, 20);
+            width1 = RandomUtils.uniform(RANDOM, 8, 20);
             height1 = 1;
         } else {
-            height1 = RandomUtils.uniform(RANDOM, 5, 20);
+            height1 = RandomUtils.uniform(RANDOM, 6, 20);
             width1 = 1;
         }
 
@@ -261,6 +284,7 @@ public class Game {
         addWall(world, p, width, height);
 
         makeRoom(world, p, width, height);
+
 
     }
 
