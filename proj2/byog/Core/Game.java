@@ -12,9 +12,9 @@ public class Game {
     TERenderer ter = new TERenderer();
     /* Feel free to change the width and height. */
     public static final int WIDTH = 80;
-    public static final int HEIGHT = 30;
+    public static final int HEIGHT = 50;
 
-    private static final long SEED = 2873123;
+    private static final long SEED = 5;
     private static final Random RANDOM = new Random(SEED);
 
     public TETile[][] world = new TETile[WIDTH][HEIGHT];
@@ -44,11 +44,29 @@ public class Game {
         } else if (width == 1){
             x = prev.x;
             y = RandomUtils.uniform(RANDOM, prev.y, prev.y + height);
-        } else {
-            x = prev.x + width;
-            y = RandomUtils.uniform(RANDOM, prev.y, prev.y + height);
         }
 
+        return new Position(x, y);
+    }
+
+    public Position getNextAtCorner(Position prev, int width, int height) {
+        int corner = RandomUtils.uniform(RANDOM, 0, 3);
+        int x = 0;
+        int y = 0;
+        switch (corner) {
+            case 0:
+                x = prev.x;
+                y = prev.y;
+            case 1:
+                x = prev.x;
+                y = prev.y + height;
+            case 2:
+                x = prev.x + width;
+                y = prev.y + height;
+            case 3:
+                x = prev.x + width;
+                y = prev.y;
+        }
         return new Position(x, y);
     }
 
@@ -74,11 +92,11 @@ public class Game {
 
     /* Make a random room by previous geometry */
     public void makeRoom(TETile[][] world, Position prev, int prevWidth, int prevHeight){
-        int width = RandomUtils.uniform(RANDOM, 2, 6);
-        int height = RandomUtils.uniform(RANDOM, 2, 6);
+        int width = RandomUtils.uniform(RANDOM, 1, 12);
+        int height = RandomUtils.uniform(RANDOM, 1, 12);
 
         Position originStart = getNextPosition(prev, prevWidth, prevHeight);
-        Position newStart = movePoint(originStart, width, height);
+        Position newStart = originStart;
 
         if (newStart.x + width >= WIDTH) {
             addLocker(world);
@@ -88,6 +106,8 @@ public class Game {
         }
         if (newStart.y <= 0) {
             newStart.y = 2;
+        } if (newStart.x <= 0) {
+            newStart.x = 2;
         }
 
         drawRoom(world, newStart, width, height);
@@ -112,29 +132,61 @@ public class Game {
 
     /* Generate a Hallway */
     public void makeHallway(TETile[][] world, Position prev, int prevWidth, int prevHeight) {
-        Position next1 = getNextPosition(prev, prevWidth, prevHeight);
+        Position next = new Position(0, 0);
         boolean isHorizontal = RandomUtils.bernoulli(RANDOM);
+        int corner = RandomUtils.uniform(RANDOM, 0, 4);
 
 
         int width1;
         int height1;
         if (isHorizontal) {
-            width1 = RandomUtils.uniform(RANDOM, 6, 15);
+            width1 = RandomUtils.uniform(RANDOM, 4, 10);
             height1 = 1;
         } else {
-            height1 = RandomUtils.uniform(RANDOM, 9, 18);
+            height1 = RandomUtils.uniform(RANDOM, 5, 15);
             width1 = 1;
         }
 
-        Position newStart = movePoint(next1, width1, height1);
+        switch (corner) {
+            case 0:
+                if (isHorizontal) {
+                    next.x = prev.x - width1;
+                    next.y = prev.y;
+                } else {
+                    next.x = prev.x;
+                    next.y = prev.y - height1;
+                }
+            case 1:
+                if (isHorizontal) {
+                    next.x = prev.x - width1;
+                    next.y = prev.y + prevWidth;
+                } else {
+                    next.x = prev.x;
+                    next.y = prev.y + prevHeight;
+                }
+            case 2:
+                next.x = prev.x + prevWidth;
+                next.y = prev.y + prevHeight;
+            case 3:
+                next.x = prev.x + prevWidth;
+                if (isHorizontal) {
+                    next.y = prev.y;
+                } else {
+                    next.y = prev.y - height1;
+                }
+        }
+
+        Position newStart = next;
 
         if (newStart.x + width1 >= WIDTH) {
             addLocker(world);
             return;
         } else if (newStart.y + height1 >= HEIGHT) {
-            newStart.y -= height1;
+            newStart.y = prev.y - height1;
         } else if (newStart.y <= 0) {
-            newStart.y = 2;
+            newStart.y = prev.y + prevHeight;
+        } else if (newStart.x <= 0) {
+            newStart.x = prev.x + prevWidth;
         }
 
         drawHallway(world, newStart, width1, height1);
@@ -246,7 +298,7 @@ public class Game {
         fillWithNothing(world);
 
 
-        Position startPosition = new Position(5, 5);
+        Position startPosition = new Position(20, 20);
         makeRoom(world, startPosition, 3, 4);
 
         TETile[][] finalWorldFrame = world;
@@ -258,8 +310,8 @@ public class Game {
         newGame.ter.initialize(WIDTH, HEIGHT);
         newGame.fillWithNothing(newGame.world);
 
-        Position p = new Position(8, 15);
-        newGame.makeRoom(newGame.world, p, 2, 4);
+        Position p = new Position(10, 20);
+        newGame.makeRoom(newGame.world, p, 1, 6);
 
         newGame.ter.renderFrame(newGame.world);
     }
