@@ -349,7 +349,7 @@ public class Game {
         return finalWorldFrame;
     }
 
-    public static void main(String[] args) {
+/*    public static void main(String[] args) {
         Game newGame = new Game();
         newGame.ter.initialize(WIDTH, HEIGHT);
         newGame.fillWithNothing(newGame.world);
@@ -358,5 +358,5 @@ public class Game {
         newGame.makeRoom(newGame.world, p, 1, 4);
 
         newGame.ter.renderFrame(newGame.world);
-    }
+    }*/
 }
