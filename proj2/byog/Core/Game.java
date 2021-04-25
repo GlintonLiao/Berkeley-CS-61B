@@ -12,9 +12,9 @@ public class Game {
     TERenderer ter = new TERenderer();
     /* Feel free to change the width and height. */
     public static final int WIDTH = 80;
-    public static final int HEIGHT = 50;
+    public static final int HEIGHT = 30;
 
-    private static final long SEED = 256;
+    private static final long SEED = 45;
     private static final Random RANDOM = new Random(SEED);
 
     public TETile[][] world = new TETile[WIDTH][HEIGHT];
@@ -162,7 +162,7 @@ public class Game {
         int width1;
         int height1;
         if (isHorizontal) {
-            width1 = RandomUtils.uniform(RANDOM, 8, 20);
+            width1 = RandomUtils.uniform(RANDOM, 8, 12);
             height1 = 1;
         } else {
             height1 = RandomUtils.uniform(RANDOM, 6, 20);
@@ -283,9 +283,62 @@ public class Game {
         // Add wall to the outlines
         addWall(world, p, width, height);
 
+        // 1/2 chance to generate a room when the hallway is vertical
+        makeEndWay(world, p, width, height);
+
+        //start over
         makeRoom(world, p, width, height);
 
 
+    }
+
+    /** There is 1/2 chance of placing a room at the end of the vertical hallway.
+     * if the previous hallway is vertical, then pick the highest or the lowest point and generate a horizontal hallway pointing back.
+     * And generate a room at the leftmost of the hallway.
+     */
+    public void makeEndWay(TETile[][] world, Position prev, int prevWidth, int prevHeight) {
+        boolean isEnding = RandomUtils.bernoulli(RANDOM);
+        boolean upmost = RandomUtils.bernoulli(RANDOM);
+        int width = RandomUtils.uniform(RANDOM, 2, 10);
+        int height = RandomUtils.uniform(RANDOM, 2, 6);
+        Position next = prev;
+
+        if (prevWidth > 1 || !isEnding) {
+            return;
+        }
+
+        if (upmost) {
+            next.y = prev.y + prevHeight - 1;
+        } else {
+            next.y = prev.y;
+        }
+
+        if (next.x + width >= WIDTH) {
+            addLocker(world);
+            return;
+        } else if (next.y + height >= HEIGHT) {
+            next.y = next.y - height + 1;
+        }
+        if (next.y <= 0) {
+            next.y = next.y + height - 1;
+        } if (next.x <= 0) {
+            next.x = 2;
+        }
+
+        drawEndRoom(world, next, width, height);
+
+    }
+
+    /* Draw a room without invoke another makeHallway method.*/
+    public void drawEndRoom(TETile[][] world, Position p, int width, int height) {
+        // fill with floor tile
+        for (int i = p.x; i < p.x + width; i += 1) {
+            for (int j = p.y; j < p.y + height; j += 1) {
+                world[i][j] = Tileset.FLOOR;
+            }
+        }
+
+        addWall(world, p, width, height);
     }
 
     /* Add a frame to the geometry */
@@ -349,7 +402,7 @@ public class Game {
         return finalWorldFrame;
     }
 
-/*    public static void main(String[] args) {
+    public static void main(String[] args) {
         Game newGame = new Game();
         newGame.ter.initialize(WIDTH, HEIGHT);
         newGame.fillWithNothing(newGame.world);
@@ -358,5 +411,5 @@ public class Game {
         newGame.makeRoom(newGame.world, p, 1, 4);
 
         newGame.ter.renderFrame(newGame.world);
-    }*/
+    }
 }
