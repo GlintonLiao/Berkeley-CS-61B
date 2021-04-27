@@ -12,9 +12,9 @@ public class Game {
     TERenderer ter = new TERenderer();
     /* Feel free to change the width and height. */
     public static final int WIDTH = 80;
-    public static final int HEIGHT = 30;
+    public static final int HEIGHT = 50;
 
-    private static final long SEED = 45;
+    private static final long SEED = 963;
     private static final Random RANDOM = new Random(SEED);
 
     public TETile[][] world = new TETile[WIDTH][HEIGHT];
@@ -395,7 +395,8 @@ public class Game {
         fillWithNothing(world);
 
 
-        Position startPosition = new Position(20, 20);
+
+        Position startPosition = new Position(8, 8);
         makeRoom(world, startPosition, 3, 4);
 
         TETile[][] finalWorldFrame = world;
