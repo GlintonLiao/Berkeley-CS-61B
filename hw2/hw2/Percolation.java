@@ -44,6 +44,30 @@ public class Percolation {
         return openSize;
     }
 
+    public void connectTop(int row, int col) {
+        if (row != 0) {
+            if (isOpen(row - 1, col)) {
+                UnionFind.union(xyTo1D(row, col), xyTo1D(row - 1, col));
+            }
+        }
+    }
+
+    public void connectLeft(int row, int col) {
+        if (col != 0) {
+            if (isOpen(row, col - 1)) {
+                UnionFind.union(xyTo1D(row, col), xyTo1D(row, col - 1));
+            }
+        }
+    }
+
+    public void connectRight(int row, int col) {
+        if (col != grid.length - 1) {
+            if (isOpen(row, col + 1)) {
+                UnionFind.union(xyTo1D(row, col), xyTo1D(row, col + 1));
+            }
+        }
+    }
+
     // if the virtual head node and the virtual tail node is connected, return true;
     public boolean percolates() {
         return UnionFind.connected(-1, grid.length * grid.length - 1);
