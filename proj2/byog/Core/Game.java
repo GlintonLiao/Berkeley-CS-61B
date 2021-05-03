@@ -1,5 +1,6 @@
 package byog.Core;
 
+import byog.SaveDemo.World;
 import byog.TileEngine.TERenderer;
 import byog.TileEngine.TETile;
 import byog.TileEngine.Tileset;
@@ -10,6 +11,7 @@ import java.awt.Font;
 
 import byog.lab5.Position;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class Game {
@@ -19,9 +21,10 @@ public class Game {
     public static final int HEIGHT = 50;
 
     private static long SEED;
-    private static final Random RANDOM = new Random(SEED);
+    private static Random RANDOM;
 
     public TETile[][] world = new TETile[WIDTH][HEIGHT];
+    int[] player;
 
     /**
      * Fills the given 2D array of tiles with NOTHING tiles.
@@ -400,18 +403,6 @@ public class Game {
     }
 
 
-    /**
-     * Phase 2: The UI for starting the game
-     */
-    public void drawFrame(String s) {
-        int midwidth = 640;
-        int midheight = 640;
-
-        StdDraw.clear();
-        StdDraw.clear(Color.BLACK);
-    }
-
-
 
 
     /**
@@ -419,22 +410,176 @@ public class Game {
      */
     public void playWithKeyboard() {
         StdDraw.setCanvasSize(1280, 1280);
-        Font font = new Font("Monaco", Font.BOLD, 30);
-        StdDraw.setFont(font);
         StdDraw.setXscale(0, 1280);
         StdDraw.setYscale(0, 1280);
         StdDraw.clear(Color.BLACK);
         StdDraw.enableDoubleBuffering();
 
+        Font bigFont = new Font("Monaco", Font.BOLD, 30);
+        StdDraw.setFont(bigFont);
+        StdDraw.setPenColor(Color.white);
+        StdDraw.text(640, 960, "CS61B: THE GAME");
 
-        ter.initialize(WIDTH, HEIGHT);
-        fillWithNothing(world);
+        Font smallFont = new Font("Monaco", Font.PLAIN, 20);
+        StdDraw.setFont(smallFont);
+        StdDraw.setPenColor(Color.white);
+        StdDraw.text(640, 680, "New Game (N)");
+        StdDraw.text(640, 640, "Load Game(L)");
+        StdDraw.text(640, 600, "Quit (Q)");
+        StdDraw.show();
 
-        Position p = new Position(8, 8);
-        makeRoom(world, p, 1, 4);
+        char inputChar = solicitInput();
 
-        ter.renderFrame(world);
+        if (inputChar == 'n') {
+            StdDraw.clear(Color.BLACK);
+            StdDraw.text(640, 640, "Please enter the seed: ");
+            StdDraw.show();
+
+            String input = "";
+
+            while (true) {
+                if (StdDraw.hasNextKeyTyped()) {
+                    char key = Character.toLowerCase(StdDraw.nextKeyTyped());
+
+                    if (key == 's') {
+                        break;
+                    }
+
+                    input += key;
+                    StdDraw.clear(Color.BLACK);
+                    StdDraw.text(640, 640, "Please enter the seed: ");
+                    StdDraw.text(640, 600, "Your input: " + input);
+                    StdDraw.show();
+                }
+            }
+
+            SEED = Long.parseLong(input);
+            RANDOM = new Random(SEED);
+
+            ter.initialize(WIDTH, HEIGHT);
+            fillWithNothing(world);
+
+            Position p = new Position(8, 8);
+            makeRoom(world, p, 1, 4);
+
+            generatePlayer();
+
+            ter.renderFrame(world);
+            showTile(world);
+
+        }
+
+        if (inputChar == 'q') {
+            System.exit(0);
+        }
+
+        if (inputChar == 'l') {
+            System.exit(0);
+        }
+
+        play();
     }
+
+    public char solicitInput() {
+        ArrayList<Character> nlq = new ArrayList<>();
+        nlq.add('n');
+        nlq.add('l');
+        nlq.add('q');
+        while (true) {
+            if (StdDraw.hasNextKeyTyped()) {
+                char key = Character.toLowerCase(StdDraw.nextKeyTyped());
+                if (nlq.contains(key)) {
+                    return key;
+                }
+            }
+        }
+    }
+
+    public void play() {
+
+        while (true) {
+            if (StdDraw.hasNextKeyTyped()) {
+                showTile(world);
+                char input = Character.toLowerCase(StdDraw.nextKeyTyped());
+
+                if (input == 'w' || input == 'a' || input == 's' || input == 'd') {
+                    move(input);
+                    ter.renderFrame(world);
+                    showTile(world);
+                }
+
+                if (input == ':') {
+                    while (true) {
+                        if (StdDraw.hasNextKeyTyped()) {
+                            char keyToExit = Character.toLowerCase(StdDraw.nextKeyTyped());
+                            if (keyToExit == 'q') {
+                                System.exit(0);
+                            } else {
+                                showTile(world);
+                                ter.renderFrame(world);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void generatePlayer() {
+        int x = RandomUtils.uniform(RANDOM, 0, WIDTH);
+        int y = RandomUtils.uniform(RANDOM, 0, HEIGHT);
+        while (world[x][y] != Tileset.FLOOR) {
+            x = RandomUtils.uniform(RANDOM, 0, WIDTH);
+            y = RandomUtils.uniform(RANDOM, 0, HEIGHT);
+        }
+        player = new int[]{x, y};
+        world[x][y] = Tileset.PLAYER;
+    }
+
+    public void moveInt(int x, int y) {
+        int px = this.player[0];
+        int py = this.player[1];
+
+        if (this.world[px + x][py + y].equals(Tileset.FLOOR)) {
+            this.world[px + x][py + y] = Tileset.PLAYER;
+            this.world[px][py] = Tileset.FLOOR;
+            this.player = new int[]{px + x, py + y};
+        }
+    }
+
+    public void move(char c) {
+        if (c == 'w') {
+            moveInt(0, 1);
+        }
+        if (c == 'a') {
+            moveInt(-1, 0);
+        }
+        if (c == 's') {
+            moveInt(0, -1);
+        }
+        if (c == 'd') {
+            moveInt(1, 0);
+        }
+
+    }
+
+    public void showTile(TETile[][] world) {
+        int x = (int) StdDraw.mouseX();
+        int y = (int) StdDraw.mouseY();
+        String tileName = "";
+
+        if (x < WIDTH && y < HEIGHT) {
+            tileName = world[x][y].description();
+            StdDraw.setPenColor(Color.white);
+            Font nameFont = new Font("Monaco", Font.PLAIN, 20);
+            StdDraw.setFont(nameFont);
+            StdDraw.textLeft(1, HEIGHT - 1, tileName);
+        }
+
+        StdDraw.show();
+    }
+
 
     /**
      * Method used for autograding and testing the game code. The input string will be a series
