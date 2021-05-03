@@ -2,8 +2,12 @@ package byog.Core;
 
 import byog.TileEngine.TERenderer;
 import byog.TileEngine.TETile;
-import byog.Core.RandomUtils;
 import byog.TileEngine.Tileset;
+
+import edu.princeton.cs.introcs.StdDraw;
+import java.awt.Color;
+import java.awt.Font;
+
 import byog.lab5.Position;
 
 import java.util.Random;
@@ -14,7 +18,7 @@ public class Game {
     public static final int WIDTH = 80;
     public static final int HEIGHT = 50;
 
-    private static final long SEED = 963;
+    private static long SEED;
     private static final Random RANDOM = new Random(SEED);
 
     public TETile[][] world = new TETile[WIDTH][HEIGHT];
@@ -131,6 +135,7 @@ public class Game {
             newStart.x = 2;
         }
 
+        // Start over
         drawRoom(world, newStart, width, height);
     }
 
@@ -147,7 +152,7 @@ public class Game {
         // Add wall to the outlines
         addWall(world, p, width, height);
 
-
+        // Start over
         makeHallway(world, p, width, height);
 
     }
@@ -158,9 +163,9 @@ public class Game {
         boolean isHorizontal = RandomUtils.bernoulli(RANDOM);
         int corner = RandomUtils.uniform(RANDOM, 0, 4);
 
-
         int width1;
         int height1;
+
         if (isHorizontal) {
             width1 = RandomUtils.uniform(RANDOM, 8, 12);
             height1 = 1;
@@ -202,6 +207,8 @@ public class Game {
                 break;
         }*/
 
+
+        // Pick a corner as the start point of the hallway randomly
         switch (corner) {
             case 0:
                 next.x = prev.x - width1 + 1;
@@ -221,7 +228,9 @@ public class Game {
                 break;
         }
 
+        // Check feasibility
         if (next.x + width1 >= WIDTH) {
+            // The generation process reaches the end
             addLocker(world);
             return;
         } else if (next.y + height1 >= HEIGHT) {
@@ -303,17 +312,21 @@ public class Game {
         int height = RandomUtils.uniform(RANDOM, 2, 6);
         Position next = prev;
 
+        // When the hallway is horizontal or the ending factor equals to 0, do nothing
         if (prevWidth > 1 || !isEnding) {
             return;
         }
 
+        // pick the ending point of the hallway in last round
         if (upmost) {
             next.y = prev.y + prevHeight - 1;
         } else {
             next.y = prev.y;
         }
 
+        // Check feasibility
         if (next.x + width >= WIDTH) {
+            // The generation process reaches the end
             addLocker(world);
             return;
         } else if (next.y + height >= HEIGHT) {
@@ -338,6 +351,7 @@ public class Game {
             }
         }
 
+        // Add wall to the outlines
         addWall(world, p, width, height);
     }
 
@@ -346,6 +360,22 @@ public class Game {
         int newWidth = width + 2;
         int newHeight = height + 2;
         Position newP = new Position(p.x - 1, p.y - 1);
+
+
+        // Prevent from setting the wall out of bound
+        if (newP.x > WIDTH) {
+            newP.x = WIDTH;
+        } else if (newP.x < 0) {
+            newP.x = 0;
+        }
+
+        if (newP.y > HEIGHT) {
+            newP.y = HEIGHT;
+        } else if (newP.y < 0) {
+            newP.y = 0;
+        }
+
+        // Fill with WALL tile
         for (int i = newP.x; i < newP.x + newWidth; i += 1) {
             for (int j = newP.y; j < newP.y + newHeight; j += 1) {
                 if (world[i][j] == Tileset.FLOOR) {
@@ -357,6 +387,7 @@ public class Game {
         }
     }
 
+    /* Find a golden door in WALL tile */
     public void addLocker(TETile[][] world) {
         int x = RandomUtils.uniform(RANDOM, WIDTH);
         int y = RandomUtils.uniform(RANDOM, HEIGHT);
@@ -368,10 +399,41 @@ public class Game {
         world[x][y] = Tileset.LOCKED_DOOR;
     }
 
+
+    /**
+     * Phase 2: The UI for starting the game
+     */
+    public void drawFrame(String s) {
+        int midwidth = 640;
+        int midheight = 640;
+
+        StdDraw.clear();
+        StdDraw.clear(Color.BLACK);
+    }
+
+
+
+
     /**
      * Method used for playing a fresh game. The game should start from the main menu.
      */
     public void playWithKeyboard() {
+        StdDraw.setCanvasSize(1280, 1280);
+        Font font = new Font("Monaco", Font.BOLD, 30);
+        StdDraw.setFont(font);
+        StdDraw.setXscale(0, 1280);
+        StdDraw.setYscale(0, 1280);
+        StdDraw.clear(Color.BLACK);
+        StdDraw.enableDoubleBuffering();
+
+
+        ter.initialize(WIDTH, HEIGHT);
+        fillWithNothing(world);
+
+        Position p = new Position(8, 8);
+        makeRoom(world, p, 1, 4);
+
+        ter.renderFrame(world);
     }
 
     /**
@@ -391,10 +453,9 @@ public class Game {
         // and return a 2D tile representation of the world that would have been
         // drawn if the same inputs had been given to playWithKeyboard().
 
+        SEED = Long.parseLong(input);
         ter.initialize(WIDTH, HEIGHT);
         fillWithNothing(world);
-
-
 
         Position startPosition = new Position(8, 8);
         makeRoom(world, startPosition, 3, 4);
@@ -403,7 +464,9 @@ public class Game {
         return finalWorldFrame;
     }
 
-    public static void main(String[] args) {
+
+    // Test for Phase 1
+    /*public static void main(String[] args) {
         Game newGame = new Game();
         newGame.ter.initialize(WIDTH, HEIGHT);
         newGame.fillWithNothing(newGame.world);
@@ -412,5 +475,5 @@ public class Game {
         newGame.makeRoom(newGame.world, p, 1, 4);
 
         newGame.ter.renderFrame(newGame.world);
-    }
+    }*/
 }
