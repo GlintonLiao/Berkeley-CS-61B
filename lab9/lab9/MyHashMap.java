@@ -71,6 +71,8 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         if (!buckets[i].containsKey(key)) {
             size += 1;
         }
+
+        // if already existed, size won't change
         buckets[i].put(key, value);
     }
 
