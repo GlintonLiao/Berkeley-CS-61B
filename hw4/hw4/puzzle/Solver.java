@@ -8,8 +8,8 @@ import java.util.HashMap;
 
 public class Solver {
     private int moves;
-    private Stack<WorldState> al;
-    private HashMap<WorldState, Integer> mp = new HashMap<>();
+    private Stack<WorldState> traversedWords = new Stack<>();
+    private HashMap<WorldState, Integer> wordsMap = new HashMap<>();
 
     public class SearchNode implements Comparable<SearchNode> {
         private WorldState state;
@@ -22,23 +22,26 @@ public class Solver {
             return (this.currentMoves - this.estimatedDis) - (o.currentMoves - o.estimatedDis);
         }
 
-        public SearchNode(WorldState state, int sofar, SearchNode prev) {
+        public SearchNode(WorldState state, int currentMoves, SearchNode prev) {
             this.state = state;
-            this.currentMoves = sofar;
+            this.currentMoves = currentMoves;
             this.prev = prev;
 
-            if (mp != null && mp.containsKey(state)) {
-                this.estimatedDis = mp.get(state);
+            // Determine the value of estimated distance
+            if (wordsMap != null && wordsMap.containsKey(state)) {
+                this.estimatedDis = wordsMap.get(state);
             } else {
                 this.estimatedDis = state.estimatedDistanceToGoal();
-                mp.put(state, estimatedDis);
+                wordsMap.put(state, estimatedDis);
             }
         }
     }
 
-    public Solver(WorldState initialState) {
-        SearchNode node = new SearchNode(initialState, 0, null);
+    public Solver(WorldState initial) {
+        SearchNode node = new SearchNode(initial, 0, null);
         MinPQ<SearchNode> queue = new MinPQ<>();
+
+        // Add the neighbors to the priority queue, and remove the node which has smallest estimatedDis
         while (!node.state.isGoal()) {
             for (WorldState neighbor : node.state.neighbors()) {
                 if (node.prev == null || !neighbor.equals(node.prev.state)) {
@@ -48,10 +51,12 @@ public class Solver {
             node = queue.delMin();
         }
 
+        // Set the final moves number when reaches to the goal
         moves = node.currentMoves;
-        al = new Stack<>();
+
+        // Iterate through all the words from back to front, add them to the stack
         while (node != null) {
-            al.push(node.state);
+            traversedWords.push(node.state);
             node = node.prev;
         }
     }
@@ -61,6 +66,6 @@ public class Solver {
     }
 
     public Iterable<WorldState> solution() {
-        return al;
+        return traversedWords;
     }
 }
